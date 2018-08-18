@@ -1,3 +1,9 @@
+/*
+MIT License
+
+Copyright (c) 2018 Xavier "Crashoz" Launey
+*/
+
 #pragma once
 
 #include <random>
@@ -212,6 +218,10 @@ class UUID {
       return stream;
     }
 
+    size_t hash() const {
+      return *((uint64_t*)data) ^ *((uint64_t*)data+8);
+    }
+
   private:
     alignas(128) uint8_t data[16];
 };
@@ -249,4 +259,14 @@ class UUIDGenerator {
     std::uniform_int_distribution<uint64_t> distribution;
 };
 
+}
+
+namespace std {
+  template <> struct hash<UUID::UUID>
+  {
+    size_t operator()(const UUID::UUID & uuid) const
+    {
+      return uuid.hash();
+    }
+  };
 }

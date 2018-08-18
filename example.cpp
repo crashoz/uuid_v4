@@ -27,6 +27,9 @@ int main(int argc, char* argv[]) {
   auto diff = t2-t1;
   std::cout << "ops/sec: " << IT / (std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count() / 1e9) << std::endl;
 
+  UUID::UUID load;
+  std::cin >> load;
+  std::cout << load << std::endl;
 
   return 0;
 }
