@@ -8,7 +8,7 @@ This library generates UUIDs with pseudo-random numbers, seeded by true (hardwar
 ## Usage
 
 Include `"uuid_v4.h"` and `"endianness.h"`.
-To start generating UUIDs you need to create an object `UUID::UUIDGenerator<random_generator>` where random_generator is a c\++11 Random number engine (see [<random>]).
+To start generating UUIDs you need to create an object `UUID::UUIDGenerator<random_generator>` where random_generator is a c\++11 Random number engine (see [random]).
 It is highly recommended to use the default engine `std::mt19937_64` as it has a SIMD implementation (at least in libstdc++) and provides better randomness.
 
 ```c++
@@ -127,7 +127,7 @@ make
 ```
 
 [RFC-4122]: https://tools.ietf.org/html/rfc4122
-[<random>]: https://en.cppreference.com/w/cpp/header/random
+[random]: https://en.cppreference.com/w/cpp/header/random
 [basic]: https://gist.github.com/fernandomv3/46a6d7656f50ee8d39dc
 [libuuid]: https://linux.die.net/man/3/libuuid
 [boost]: https://www.boost.org/doc/libs/1_68_0/libs/uuid/doc/index.html
