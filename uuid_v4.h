@@ -165,7 +165,7 @@ class UUID {
       // It's faster to compare two uint64_t
       uint64_t *x = (uint64_t*)lhs.data;
       uint64_t *y = (uint64_t*)rhs.data;
-      return *x < *y || *(x+1) < *(y+1);
+      return *x < *y || (*x == *y && *(x + 1) < *(y + 1));
     }
 
     friend bool operator!=(const UUID &lhs, const UUID &rhs) { return !(lhs == rhs); }
