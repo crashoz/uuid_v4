@@ -56,7 +56,7 @@ void m128itos(__m128i x, char* mem) {
 
   _mm256_storeu_si256((__m256i*)mem, betole256(resd));
   *(uint16_t*)(mem+16) = betole16(_mm256_extract_epi16(res, 7));
-  *(uint32_t*)(mem+32) = betole16(_mm256_extract_epi32(res, 7));
+  *(uint32_t*)(mem+32) = betole32(_mm256_extract_epi32(res, 7));
 }
 
 /*
@@ -70,7 +70,7 @@ __m128i stom128i(const char* mem) {
   __m256i x = betole256(_mm256_loadu_si256((__m256i*)mem));
   x = _mm256_shuffle_epi8(x, dash_shuffle);
   x = _mm256_insert_epi16(x, betole16(*(uint16_t*)(mem+16)), 7);
-  x = _mm256_insert_epi32(x, betole16(*(uint32_t*)(mem+32)), 7);
+  x = _mm256_insert_epi32(x, betole32(*(uint32_t*)(mem+32)), 7);
 
   // Build a mask to apply a different offset to alphas and digits
   const __m256i sub = _mm256_set1_epi8(0x2F);
