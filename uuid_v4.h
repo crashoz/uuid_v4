@@ -155,7 +155,7 @@ class UUID {
     }
 
     friend bool operator==(const UUID &lhs, const UUID &rhs) {
-      __m128i x = _mm_load_si128((__m128i*)data);
+      __m128i x = _mm_load_si128((__m128i*)lhs.data);
       __m128i y = _mm_load_si128((__m128i*)rhs.data);
 
       __m128i neq = _mm_xor_si128(x, y);
