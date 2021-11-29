@@ -127,7 +127,7 @@ class UUID {
     }
 
     /* Builds an UUID from a byte string (16 bytes long) */
-    UUID(const std::string &bytes) {
+    explicit UUID(const std::string &bytes) {
       __m128i x = betole128(_mm_loadu_si128((__m128i*)bytes.data()));
       _mm_store_si128((__m128i*)data, x);
     }
