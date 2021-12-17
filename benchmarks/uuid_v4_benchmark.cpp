@@ -9,10 +9,10 @@
 #define GENERATOR std::mt19937_64
 
 static void UUIDGeneration(benchmark::State& state) {
-  UUID::UUIDGenerator<GENERATOR> uuidGenerator;
+  UUIDv4::UUIDGenerator<GENERATOR> uuidGenerator;
   for (auto _ : state) {
     LOOP_START
-    UUID::UUID uuid = uuidGenerator.getUUID();
+    UUIDv4::UUID uuid = uuidGenerator.getUUID();
     ((void)uuid); // Prevents unused warning
     LOOP_END
   }
@@ -20,8 +20,8 @@ static void UUIDGeneration(benchmark::State& state) {
 BENCHMARK(UUIDGeneration);
 
 static void UUIDSerializeAlloc(benchmark::State& state) {
-  UUID::UUIDGenerator<GENERATOR> uuidGenerator;
-  UUID::UUID uuid = uuidGenerator.getUUID();
+  UUIDv4::UUIDGenerator<GENERATOR> uuidGenerator;
+  UUIDv4::UUID uuid = uuidGenerator.getUUID();
   for (auto _ : state) {
     LOOP_START
     std::string bytes = uuid.bytes();
@@ -31,8 +31,8 @@ static void UUIDSerializeAlloc(benchmark::State& state) {
 BENCHMARK(UUIDSerializeAlloc);
 
 static void UUIDSerializeByRef(benchmark::State& state) {
-  UUID::UUIDGenerator<GENERATOR> uuidGenerator;
-  UUID::UUID uuid = uuidGenerator.getUUID();
+  UUIDv4::UUIDGenerator<GENERATOR> uuidGenerator;
+  UUIDv4::UUID uuid = uuidGenerator.getUUID();
   std::string bytes;
   for (auto _ : state) {
     LOOP_START
@@ -43,8 +43,8 @@ static void UUIDSerializeByRef(benchmark::State& state) {
 BENCHMARK(UUIDSerializeByRef);
 
 static void UUIDSerializeCharArray(benchmark::State& state) {
-  UUID::UUIDGenerator<GENERATOR> uuidGenerator;
-  UUID::UUID uuid = uuidGenerator.getUUID();
+  UUIDv4::UUIDGenerator<GENERATOR> uuidGenerator;
+  UUIDv4::UUID uuid = uuidGenerator.getUUID();
   char bytes[16];
   for (auto _ : state) {
     LOOP_START
@@ -55,8 +55,8 @@ static void UUIDSerializeCharArray(benchmark::State& state) {
 BENCHMARK(UUIDSerializeCharArray);
 
 static void UUIDPretty(benchmark::State& state) {
-  UUID::UUIDGenerator<GENERATOR> uuidGenerator;
-  UUID::UUID uuid = uuidGenerator.getUUID();
+  UUIDv4::UUIDGenerator<GENERATOR> uuidGenerator;
+  UUIDv4::UUID uuid = uuidGenerator.getUUID();
   std::string pretty;
   for (auto _ : state) {
     LOOP_START
@@ -67,8 +67,8 @@ static void UUIDPretty(benchmark::State& state) {
 BENCHMARK(UUIDPretty);
 
 static void UUIDPrettyByRef(benchmark::State& state) {
-  UUID::UUIDGenerator<GENERATOR> uuidGenerator;
-  UUID::UUID uuid = uuidGenerator.getUUID();
+  UUIDv4::UUIDGenerator<GENERATOR> uuidGenerator;
+  UUIDv4::UUID uuid = uuidGenerator.getUUID();
   std::string pretty;
   pretty.resize(36);
   for (auto _ : state) {
@@ -82,8 +82,8 @@ static void UUIDPrettyByRef(benchmark::State& state) {
 BENCHMARK(UUIDPrettyByRef);
 
 static void UUIDPrettyCharArray(benchmark::State& state) {
-  UUID::UUIDGenerator<GENERATOR> uuidGenerator;
-  UUID::UUID uuid = uuidGenerator.getUUID();
+  UUIDv4::UUIDGenerator<GENERATOR> uuidGenerator;
+  UUIDv4::UUID uuid = uuidGenerator.getUUID();
   char* pretty = new char[36];
   for (auto _ : state) {
     LOOP_START
@@ -97,38 +97,38 @@ static void UUIDPrettyCharArray(benchmark::State& state) {
 BENCHMARK(UUIDPrettyCharArray);
 
 static void UUIDLoad(benchmark::State& state) {
-  UUID::UUIDGenerator<GENERATOR> uuidGenerator;
-  UUID::UUID uuid = uuidGenerator.getUUID();
+  UUIDv4::UUIDGenerator<GENERATOR> uuidGenerator;
+  UUIDv4::UUID uuid = uuidGenerator.getUUID();
   std::string bytes = uuid.bytes();
-  UUID::UUID uuidNew;
+  UUIDv4::UUID uuidNew;
   for (auto _ : state) {
     LOOP_START
-    benchmark::DoNotOptimize(uuidNew = UUID::UUID(bytes));
+    benchmark::DoNotOptimize(uuidNew = UUIDv4::UUID(bytes));
     LOOP_END
   }
 }
 BENCHMARK(UUIDLoad);
 
 static void UUIDParse(benchmark::State& state) {
-  UUID::UUIDGenerator<GENERATOR> uuidGenerator;
-  UUID::UUID uuid = uuidGenerator.getUUID();
+  UUIDv4::UUIDGenerator<GENERATOR> uuidGenerator;
+  UUIDv4::UUID uuid = uuidGenerator.getUUID();
   std::string pretty = uuid.str();
   const char *raw = pretty.c_str();
-  UUID::UUID uuidNew;
+  UUIDv4::UUID uuidNew;
   for (auto _ : state) {
     LOOP_START
-    benchmark::DoNotOptimize(UUID::UUID::fromStrFactory(raw));
+    benchmark::DoNotOptimize(UUIDv4::UUID::fromStrFactory(raw));
     LOOP_END
   }
 }
 BENCHMARK(UUIDParse);
 
 static void UUIDParseInPlace(benchmark::State& state) {
-  UUID::UUIDGenerator<GENERATOR> uuidGenerator;
-  UUID::UUID uuid = uuidGenerator.getUUID();
+  UUIDv4::UUIDGenerator<GENERATOR> uuidGenerator;
+  UUIDv4::UUID uuid = uuidGenerator.getUUID();
   std::string pretty = uuid.str();
   const char *raw = pretty.c_str();
-  UUID::UUID uuidNew;
+  UUIDv4::UUID uuidNew;
   for (auto _ : state) {
     LOOP_START
     benchmark::DoNotOptimize(uuidNew);
@@ -141,9 +141,9 @@ BENCHMARK(UUIDParseInPlace);
 
 
 static void UUIDEqual(benchmark::State& state) {
-  UUID::UUIDGenerator<GENERATOR> uuidGenerator;
-  UUID::UUID uuid = uuidGenerator.getUUID();
-  UUID::UUID uuid1 = uuidGenerator.getUUID();
+  UUIDv4::UUIDGenerator<GENERATOR> uuidGenerator;
+  UUIDv4::UUID uuid = uuidGenerator.getUUID();
+  UUIDv4::UUID uuid1 = uuidGenerator.getUUID();
   for (auto _ : state) {
     LOOP_START
     benchmark::DoNotOptimize(uuid == uuid1);
@@ -153,9 +153,9 @@ static void UUIDEqual(benchmark::State& state) {
 BENCHMARK(UUIDEqual);
 
 static void UUIDCompare(benchmark::State& state) {
-  UUID::UUIDGenerator<GENERATOR> uuidGenerator;
-  UUID::UUID uuid = uuidGenerator.getUUID();
-  UUID::UUID uuid1 = uuidGenerator.getUUID();
+  UUIDv4::UUIDGenerator<GENERATOR> uuidGenerator;
+  UUIDv4::UUID uuid = uuidGenerator.getUUID();
+  UUIDv4::UUID uuid1 = uuidGenerator.getUUID();
   for (auto _ : state) {
     LOOP_START
     benchmark::DoNotOptimize(uuid < uuid1);

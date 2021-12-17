@@ -5,16 +5,20 @@ It heavily relies on SIMD operations (instruction sets **SSE4.1**/**AVX**/**AVX2
 
 This library generates UUIDs with pseudo-random numbers, seeded by true (hardware) random. It is *not* a cryptographically secure way of generating UUIDs.
 
+## Update Notes
+
+The namespace changed from `UUID` to `UUIDv4` to avoid a conflict with a windows.h dependency.
+
 ## Usage
 
 Include `"uuid_v4.h"` and `"endianness.h"`.
-To start generating UUIDs you need to create an object `UUID::UUIDGenerator<random_generator>` where random_generator is a c\++11 Random number engine (see [random]).
+To start generating UUIDs you need to create an object `UUIDv4::UUIDGenerator<random_generator>` where random_generator is a c\++11 Random number engine (see [random]).
 It is highly recommended to use the default engine `std::mt19937_64` as it has a SIMD implementation (at least in libstdc++) and provides better randomness.
 
 ```c++
 #include "uuid_v4"
-UUID::UUIDGenerator<std::mt19937_64> uuidGenerator;
-UUID::UUID uuid = uuidGenerator.getUUID();
+UUIDv4::UUIDGenerator<std::mt19937_64> uuidGenerator;
+UUIDv4::UUID uuid = uuidGenerator.getUUID();
 ```
 
 Serializing an UUID to a byte string (16 bytes)
@@ -41,22 +45,22 @@ uuid.bytes(s2);
 
 Loading an UUID from a byte string (16 bytes)
 ```c++
-UUID::UUID uuid(bytes);
+UUIDv4::UUID uuid(bytes);
 ```
 
 Parsing an UUID from a pretty string (36 bytes)
 ```c++
-UUID::UUID uuid = UUID::UUID::fromStrFactory(string);
+UUIDv4::UUID uuid = UUIDv4::UUID::fromStrFactory(string);
 or
-UUID::UUID uuid;
+UUIDv4::UUID uuid;
 uuid.fromStr(string);
 ```
 
 Comparing UUIDs
 ```c++
-UUID::UUIDGenerator<std::mt19937_64> uuidGenerator;
-UUID::UUID uuid1 = uuidGenerator.getUUID();
-UUID::UUID uuid2 = uuidGenerator.getUUID();
+UUIDv4::UUIDGenerator<std::mt19937_64> uuidGenerator;
+UUIDv4::UUID uuid1 = uuidGenerator.getUUID();
+UUIDv4::UUID uuid2 = uuidGenerator.getUUID();
 if (uuid1 == uuid2) {
   std::cout << "1 in 10^36 chances of this printing" << std::endl
 }

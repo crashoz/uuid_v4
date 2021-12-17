@@ -61,8 +61,8 @@ static void BoostUUIDmt19937(benchmark::State& state) {
 BENCHMARK(BoostUUIDmt19937);
 
 static void UUID_v4(benchmark::State& state) {
-  UUID::UUIDGenerator<std::mt19937_64> uuidGenerator;
-  UUID::UUID uuid;
+  UUIDv4::UUIDGenerator<std::mt19937_64> uuidGenerator;
+  UUIDv4::UUID uuid;
   for (auto _ : state) {
     LOOP_START
     uuid = uuidGenerator.getUUID();

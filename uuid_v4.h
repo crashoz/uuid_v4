@@ -20,7 +20,7 @@ Copyright (c) 2018 Xavier "Crashoz" Launey
 
 #include "endianness.h"
 
-namespace UUID {
+namespace UUIDv4 {
 
 /*
   Converts a 128-bits unsigned int to an UUIDv4 string representation.
@@ -264,9 +264,9 @@ class UUIDGenerator {
 }
 
 namespace std {
-  template <> struct hash<UUID::UUID>
+  template <> struct hash<UUIDv4::UUID>
   {
-    size_t operator()(const UUID::UUID & uuid) const
+    size_t operator()(const UUIDv4::UUID & uuid) const
     {
       return uuid.hash();
     }
