@@ -5,6 +5,8 @@ It heavily relies on SIMD operations (instruction sets **SSE4.1**/**AVX**/**AVX2
 
 This library generates UUIDs with pseudo-random numbers, seeded by true (hardware) random. It is *not* a cryptographically secure way of generating UUIDs.
 
+While this lib is optimized to be fast with SIMD operations, it is possible to run it on any architecture with portable implementations of SIMD instructions like [simd-everywhere](https://github.com/simd-everywhere/simde)
+
 ## Update Notes
 
 The namespace changed from `UUID` to `UUIDv4` to avoid a conflict with a windows.h dependency.
