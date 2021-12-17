@@ -26,7 +26,7 @@ namespace UUID {
   Converts a 128-bits unsigned int to an UUIDv4 string representation.
   Uses SIMD via Intel's AVX2 instruction set.
  */
-void m128itos(__m128i x, char* mem) {
+void inline m128itos(__m128i x, char* mem) {
   // Expand each byte in x to two bytes in res
   // i.e. 0x12345678 -> 0x0102030405060708
   // Then translate each byte to its hex ascii representation
@@ -63,7 +63,7 @@ void m128itos(__m128i x, char* mem) {
   Converts an UUIDv4 string representation to a 128-bits unsigned int.
   Uses SIMD via Intel's AVX2 instruction set.
  */
-__m128i stom128i(const char* mem) {
+__m128i inline stom128i(const char* mem) {
   // Remove dashes and pack hex ascii bytes in a 256-bits int
   const __m256i dash_shuffle = _mm256_set_epi32(0x80808080, 0x0f0e0d0c, 0x0b0a0908, 0x06050403, 0x80800f0e, 0x0c0b0a09, 0x07060504, 0x03020100);
 
