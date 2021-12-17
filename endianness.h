@@ -51,11 +51,11 @@
       defined(bfin) || defined(BFIN)
 
       #define LITTLEENDIAN
-  #elif defined(__m68k__) || defined(M68000) || \
-        defined(__hppa__) || defined(__hppa) || defined(__HPPA__) || \
-        defined(__sparc__) || defined(__sparc) || \
+  #elif defined(__m68k__) || defined(M68000) || \
+        defined(__hppa__) || defined(__hppa) || defined(__HPPA__) || \
+        defined(__sparc__) || defined(__sparc) || \
         defined(__370__) || defined(__THW_370__) || \
-        defined(__s390__) || defined(__s390x__) || \
+        defined(__s390__) || defined(__s390x__) || \
         defined(__SYSC_ZARCH__)
 
       #define BIGENDIAN
