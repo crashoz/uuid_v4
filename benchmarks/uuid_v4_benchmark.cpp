@@ -92,7 +92,7 @@ static void UUIDPrettyCharArray(benchmark::State& state) {
     benchmark::ClobberMemory();
     LOOP_END
   }
-  delete pretty;
+  delete[] pretty;
 }
 BENCHMARK(UUIDPrettyCharArray);
 
