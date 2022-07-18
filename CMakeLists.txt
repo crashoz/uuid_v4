@@ -1,6 +1,8 @@
 cmake_minimum_required (VERSION 3.8)
 
-set(CMAKE_BUILD_TYPE Release)
+IF (NOT DEFINED CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release)
+ENDIF ()
 
 project (uuid_v4 VERSION 1.0.0 LANGUAGES CXX)
 
@@ -12,7 +14,9 @@ option(benchmark_use_internal_googlebenchmark "Build google benchmark, do not us
 IF (test_use_internal_googletest)
   # build tests (targets: gtest_main, gtest)
   add_subdirectory(vendor/google/googletest/googletest)
-  target_compile_options (gtest PRIVATE "-Wno-error=misleading-indentation")
+  if(NOT WIN32 AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    target_compile_options (gtest PRIVATE "-Wno-error=misleading-indentation")
+  endif()
   add_library(GTest::gtest INTERFACE IMPORTED)
   target_link_libraries(GTest::gtest INTERFACE gtest)
   add_library(GTest::gtest_main INTERFACE IMPORTED)
