@@ -13,7 +13,27 @@ The namespace changed from `UUID` to `UUIDv4` to avoid a conflict with a windows
 
 ## Usage
 
+### Cmake
+
+```
+mkdir build && cd build
+cmake -DCMAKE_INSTALL_PREFIX="/usr/local" ..
+cmake --install .
+```
+
+Then use
+
+```
+find_package(uuid_v4)
+target_link_libraries(MyProject uuid_v4::uuid_v4)
+```
+
+### Manually
+
 Include `"uuid_v4.h"` and `"endianness.h"`.
+
+## Documentation
+
 To start generating UUIDs you need to create an object `UUIDv4::UUIDGenerator<random_generator>` where random_generator is a c\++11 Random number engine (see [random]).
 It is highly recommended to use the default engine `std::mt19937_64` as it has a SIMD implementation (at least in libstdc++) and provides better randomness.
 
@@ -117,6 +137,9 @@ If you do not have googletest and googlebenchmark installed globally
 ```
 git clone --recurse-submodules https://github.com/crashoz/uuid_v4.git
 ```
+
+If you want to run the benchmark against the other libraries you need to install them (`libuuid` and `boost`)
+
 otherwise
 ```
 git clone https://github.com/crashoz/uuid_v4.git
@@ -127,7 +150,7 @@ Then build
 mkdir build
 cd build
 cmake -Dtest=ON -Dbenchmark=ON ..
-make
+cmake --build .
 ./tests/uuid_v4_test
 ./benchmarks/uuid_v4_benchmark
 ```
