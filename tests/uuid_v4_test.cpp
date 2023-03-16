@@ -86,4 +86,11 @@ namespace {
     ASSERT_TRUE(uuid < uuid5);
     ASSERT_FALSE(uuid > uuid5);
   }
+
+  TEST(UUIDTest, HashTest) {
+    UUIDv4::UUID uuid = UUIDv4::UUID::fromStrFactory("00120034-0056-0078-0012-003400560078");
+    UUIDv4::UUID uuid2 = UUIDv4::UUID(uuid);
+
+    ASSERT_TRUE(uuid.hash() == uuid2.hash());
+  }
 }
