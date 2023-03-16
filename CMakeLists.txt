@@ -1,8 +1,8 @@
 cmake_minimum_required (VERSION 3.8)
 
-IF (NOT DEFINED CMAKE_BUILD_TYPE)
+if (NOT DEFINED CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
-ENDIF ()
+endif ()
 
 project (uuid_v4 VERSION 1.0.0 LANGUAGES CXX)
 
@@ -11,53 +11,63 @@ option(test_use_internal_googletest "Build googletest, do not use it from system
 option(benchmark "Build benchmarks." OFF)
 option(benchmark_use_internal_googlebenchmark "Build google benchmark, do not use it from system." ON)
 
-IF (test_use_internal_googletest)
-  # build tests (targets: gtest_main, gtest)
-  add_subdirectory(vendor/google/googletest/googletest)
-  if(NOT WIN32 AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-    target_compile_options (gtest PRIVATE "-Wno-error=misleading-indentation")
-  endif()
-  add_library(GTest::gtest INTERFACE IMPORTED)
-  target_link_libraries(GTest::gtest INTERFACE gtest)
-  add_library(GTest::gtest_main INTERFACE IMPORTED)
-  target_link_libraries(GTest::gtest_main INTERFACE gtest_main)
-ELSE ()
-  find_package(GTest REQUIRED)
-ENDIF (test_use_internal_googletest)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-IF (test)
+if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
+elseif (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
+  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
+endif ()
+
+if (test)
+  if (test_use_internal_googletest)
+    # build tests (targets: gtest_main, gtest)
+    add_subdirectory(vendor/google/googletest/googletest)
+    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+      target_compile_options (gtest PRIVATE "-Wno-error=misleading-indentation")
+    endif()
+    
+    add_library(GTest::gtest INTERFACE IMPORTED)
+    target_link_libraries(GTest::gtest INTERFACE gtest)
+    add_library(GTest::gtest_main INTERFACE IMPORTED)
+    target_link_libraries(GTest::gtest_main INTERFACE gtest_main)
+  else ()
+    find_package(GTest REQUIRED)
+  endif ()
+
   enable_testing ()
   add_subdirectory (tests)
-ENDIF (test)
+endif ()
 
-IF (benchmark_use_internal_googlebenchmark)
-  # build google benchmark (target: benchmark)
-  # do not build tests of benchmarking lib
-  set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "Suppressing benchmark's tests" FORCE)
-  add_subdirectory(vendor/google/benchmark)
-  add_library(benchmark::benchmark INTERFACE IMPORTED)
-  target_link_libraries(benchmark::benchmark INTERFACE benchmark)
-ELSE ()
-  find_package(benchmark REQUIRED)
-ENDIF (benchmark_use_internal_googlebenchmark)
+if (benchmark)
+  if (benchmark_use_internal_googlebenchmark)
+    # build google benchmark (target: benchmark)
+    # do not build tests of benchmarking lib
+    set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "Suppressing benchmark's tests" FORCE)
+    add_subdirectory(vendor/google/benchmark)
+    add_library(benchmark::benchmark INTERFACE IMPORTED)
+    target_link_libraries(benchmark::benchmark INTERFACE benchmark)
+  else ()
+    find_package(benchmark REQUIRED)
+  endif ()
 
-IF (benchmark)
   add_subdirectory (benchmarks)
-ENDIF (benchmark)
+endif ()
 
 add_executable(example example.cpp)
 target_link_libraries (example)
 
-
 add_library(${PROJECT_NAME} INTERFACE)
 add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
-if(NOT CMAKE_VERSION VERSION_LESS 3.8)
+if (NOT CMAKE_VERSION VERSION_LESS 3.8)
     target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_17)
 endif()
 
 target_include_directories(${PROJECT_NAME} INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/>)
-
 
 ################################################################################
 ## PACKAGE SUPPORT
