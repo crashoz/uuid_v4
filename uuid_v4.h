@@ -221,7 +221,9 @@ class UUID {
     }
 
     size_t hash() const {
-      return *((uint64_t*)data) ^ *((uint64_t*)data+8);
+      const uint64_t a = *((uint64_t*)data);
+      const uint64_t b = *((uint64_t*)&data[8]);
+      return a ^ (b + 0x9e3779b9 + (a << 6) + (a >> 2));
     }
 
   private:
