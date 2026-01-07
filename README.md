@@ -13,20 +13,30 @@ The namespace changed from `UUID` to `UUIDv4` to avoid a conflict with a windows
 
 ## Usage
 
-### Cmake
+### CMake
 
-```
-mkdir build && cd build
-cmake -DCMAKE_INSTALL_PREFIX="/usr/local" ..
-cmake --install .
+#### Installing the library
+
+```bash
+# Configure and install
+cmake -B build -DCMAKE_INSTALL_PREFIX="/usr/local"
+cmake --build build
+cmake --install build
 ```
 
-Then use
+#### Using in your project
 
+Add to your `CMakeLists.txt`:
+
+```cmake
+find_package(uuid_v4 REQUIRED)
+target_link_libraries(MyProject PRIVATE uuid_v4::uuid_v4)
 ```
-find_package(uuid_v4)
-target_link_libraries(MyProject uuid_v4::uuid_v4)
-```
+
+The library is header-only and will automatically configure your target with:
+- C++17 standard requirement
+- AVX2 optimizations (via `-march=native` on GCC/Clang or `/arch:AVX2` on MSVC)
+- Proper include paths
 
 ### Manually
 
@@ -38,7 +48,7 @@ To start generating UUIDs you need to create an object `UUIDv4::UUIDGenerator<ra
 It is highly recommended to use the default engine `std::mt19937_64` as it has a SIMD implementation (at least in libstdc++) and provides better randomness.
 
 ```c++
-#include "uuid_v4"
+#include "<uuid_v4/uuid_v4.h>"
 UUIDv4::UUIDGenerator<std::mt19937_64> uuidGenerator;
 UUIDv4::UUID uuid = uuidGenerator.getUUID();
 ```
@@ -132,27 +142,48 @@ UUIDCompare            |        65 ns    |     65 ns |  10672186
 
 ## Building
 
-This project uses CMake to build tests and benchmarks.
-If you do not have googletest and googlebenchmark installed globally
-```
+This project uses CMake to build tests and benchmarks. **Requires CMake 3.16 or later.**
+
+### Clone the repository
+
+If you want to build tests and benchmarks with the bundled GoogleTest and Google Benchmark:
+```bash
 git clone --recurse-submodules https://github.com/crashoz/uuid_v4.git
 ```
 
-If you want to run the benchmark against the other libraries you need to install them (`libuuid` and `boost`)
-
-otherwise
-```
+Otherwise (if you have them installed system-wide):
+```bash
 git clone https://github.com/crashoz/uuid_v4.git
 ```
 
-Then build
+### Build with tests and benchmarks
+
+```bash
+# Configure with tests and benchmarks enabled
+cmake -B build -DUUID_V4_BUILD_TESTS=ON -DUUID_V4_BUILD_BENCHMARKS=ON
+
+# Build
+cmake --build build
+
+# Run tests
+ctest --test-dir build
+
+# Run benchmarks
+./build/benchmarks/uuid_v4_benchmark
 ```
-mkdir build
-cd build
-cmake -Dtest=ON -Dbenchmark=ON ..
-cmake --build .
-./tests/uuid_v4_test
-./benchmarks/uuid_v4_benchmark
+
+### Build options
+
+- `UUID_V4_BUILD_TESTS` - Build tests (default: OFF)
+- `UUID_V4_BUILD_BENCHMARKS` - Build benchmarks (default: OFF)
+- `UUID_V4_USE_INTERNAL_GTEST` - Use bundled GoogleTest instead of system version (default: ON)
+- `UUID_V4_USE_INTERNAL_GBENCH` - Use bundled Google Benchmark instead of system version (default: ON)
+
+### Running comparison benchmarks
+
+If you want to run the benchmark comparing against other UUID libraries, you need to install `libuuid` and `boost` first, then run:
+```bash
+./build/benchmarks/compare_benchmark
 ```
 
 [RFC-4122]: https://tools.ietf.org/html/rfc4122

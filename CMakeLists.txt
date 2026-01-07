@@ -1,128 +1,137 @@
-cmake_minimum_required (VERSION 3.8)
+cmake_minimum_required(VERSION 3.16...3.30)
 
-if (NOT DEFINED CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release)
-endif ()
+# Set default build type before project()
+if(NOT DEFINED CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
+endif()
 
-project (uuid_v4 VERSION 1.0.0 LANGUAGES CXX)
+project(uuid_v4
+  VERSION 1.0.0
+  LANGUAGES CXX
+  DESCRIPTION "Fast and header-only UUID version 4 generator"
+)
 
-option(test "Build all tests." OFF)
-option(test_use_internal_googletest "Build googletest, do not use it from system." ON)
-option(benchmark "Build benchmarks." OFF)
-option(benchmark_use_internal_googlebenchmark "Build google benchmark, do not use it from system." ON)
+# Options
+option(UUID_V4_BUILD_TESTS "Build all tests" OFF)
+option(UUID_V4_USE_INTERNAL_GTEST "Build googletest instead of using system version" ON)
+option(UUID_V4_BUILD_BENCHMARKS "Build benchmarks" OFF)
+option(UUID_V4_USE_INTERNAL_GBENCH "Build google benchmark instead of using system version" ON)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
+# Main library target (header-only interface library)
+add_library(${PROJECT_NAME} INTERFACE)
+add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
-if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
-elseif (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
-  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
-endif ()
+target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_17)
 
-if (test)
-  if (test_use_internal_googletest)
-    # build tests (targets: gtest_main, gtest)
-    # Set GOOGLETEST_VERSION before adding subdirectory
+target_include_directories(${PROJECT_NAME} INTERFACE
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+  $<INSTALL_INTERFACE:include>
+)
+
+# Compiler-specific options
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+  # Enable AVX2 for all configurations (required by uuid_v4.h)
+  target_compile_options(${PROJECT_NAME} INTERFACE
+    -march=native
+  )
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+  # Enable AVX2 for all configurations
+  target_compile_options(${PROJECT_NAME} INTERFACE
+    /arch:AVX2
+    $<$<CONFIG:Release>:/MT>
+    $<$<CONFIG:Debug>:/MTd>
+  )
+endif()
+
+# Testing support
+if(UUID_V4_BUILD_TESTS)
+  if(UUID_V4_USE_INTERNAL_GTEST)
+    # Build GoogleTest from source
     set(GOOGLETEST_VERSION 1.15.2)
-    add_subdirectory(vendor/google/googletest/googletest)
+    add_subdirectory(vendor/google/googletest/googletest EXCLUDE_FROM_ALL)
+
     if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-      target_compile_options (gtest PRIVATE "-Wno-error=misleading-indentation")
+      target_compile_options(gtest PRIVATE -Wno-error=misleading-indentation)
     endif()
 
-    # Modern GoogleTest creates GTest::gtest and GTest::gtest_main targets automatically
-    # Only create them if they don't exist (for older versions)
+    # Create aliases if they don't exist
     if(NOT TARGET GTest::gtest)
       add_library(GTest::gtest ALIAS gtest)
     endif()
     if(NOT TARGET GTest::gtest_main)
       add_library(GTest::gtest_main ALIAS gtest_main)
     endif()
-  else ()
+  else()
     find_package(GTest REQUIRED)
-  endif ()
+  endif()
 
-  enable_testing ()
-  add_subdirectory (tests)
-endif ()
+  enable_testing()
+  add_subdirectory(tests)
+endif()
 
-if (benchmark)
-  if (benchmark_use_internal_googlebenchmark)
-    # build google benchmark (target: benchmark)
-    # do not build tests of benchmarking lib
-    set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "Suppressing benchmark's tests" FORCE)
-    add_subdirectory(vendor/google/benchmark)
+# Benchmarking support
+if(UUID_V4_BUILD_BENCHMARKS)
+  if(UUID_V4_USE_INTERNAL_GBENCH)
+    # Build Google Benchmark from source
+    set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "Disable benchmark's own tests" FORCE)
+    add_subdirectory(vendor/google/benchmark EXCLUDE_FROM_ALL)
 
-    # Modern Google Benchmark creates benchmark::benchmark target automatically
-    # Only create it if it doesn't exist (for older versions)
+    # Create alias if it doesn't exist
     if(NOT TARGET benchmark::benchmark)
       add_library(benchmark::benchmark ALIAS benchmark)
     endif()
-  else ()
+  else()
     find_package(benchmark REQUIRED)
-  endif ()
+  endif()
 
-  add_subdirectory (benchmarks)
-endif ()
-
-add_executable(example example.cpp)
-target_link_libraries (example)
-
-add_library(${PROJECT_NAME} INTERFACE)
-add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
-
-if (NOT CMAKE_VERSION VERSION_LESS 3.8)
-    target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_17)
+  add_subdirectory(benchmarks)
 endif()
 
-target_include_directories(${PROJECT_NAME} INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/>)
+# Example executable
+add_executable(example example.cpp)
+target_link_libraries(example PRIVATE ${PROJECT_NAME}::${PROJECT_NAME})
 
 ################################################################################
-## PACKAGE SUPPORT
+## Installation and Package Support
 ################################################################################
-
-set(generated_dir "${CMAKE_CURRENT_BINARY_DIR}/generated")
-
-set(include_install_dir "include")
-set(config_install_dir "lib/cmake/${PROJECT_NAME}")
-
-
-set(version_config "${generated_dir}/${PROJECT_NAME}ConfigVersion.cmake")
-set(project_config "${generated_dir}/${PROJECT_NAME}Config.cmake")
-set(targets_export_name "${PROJECT_NAME}Targets")
-set(namespace "${PROJECT_NAME}::")
 
 include(CMakePackageConfigHelpers)
+include(GNUInstallDirs)
 
-# CMake automatically adds an architecture compatibility check to make sure
-# 32 and 64 bit code is not accidentally mixed. For a header-only library this
-# is not required. The check can be disabled by temporarily unsetting
-# CMAKE_SIZEOF_VOID_P. In CMake 3.14 and later this can be achieved more cleanly
-# with write_basic_package_version_file(ARCH_INDEPENDENT).
-# TODO: Use this once a newer CMake can be required.
-set(TMP_SIZEOF_VOID_P ${CMAKE_SIZEOF_VOID_P})
-unset(CMAKE_SIZEOF_VOID_P)
-write_basic_package_version_file(
-    "${version_config}" VERSION ${PROJECT_VERSION} COMPATIBILITY SameMajorVersion
-)
-set(CMAKE_SIZEOF_VOID_P ${TMP_SIZEOF_VOID_P})
-
-configure_file("Config.cmake.in" "${project_config}" @ONLY)
-
+# Install the header-only library
 install(TARGETS ${PROJECT_NAME}
-        EXPORT "${targets_export_name}"
-        INCLUDES DESTINATION "${include_install_dir}")
+  EXPORT ${PROJECT_NAME}Targets
+  INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
 
-install(FILES "uuid_v4.h"
-        DESTINATION "${include_install_dir}/uuid_v4")
-install(FILES "endianness.h"
-        DESTINATION "${include_install_dir}/uuid_v4")
+# Install headers
+install(FILES uuid_v4.h endianness.h
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}
+)
 
-install(FILES "${project_config}" "${version_config}"
-        DESTINATION "${config_install_dir}")
+# Generate and install package configuration files
+set(config_install_dir ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
 
-install(EXPORT "${targets_export_name}"
-        NAMESPACE "${namespace}"
-        DESTINATION "${config_install_dir}")
+write_basic_package_version_file(
+  "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
+  VERSION ${PROJECT_VERSION}
+  COMPATIBILITY SameMajorVersion
+  ARCH_INDEPENDENT  # Header-only library is architecture-independent
+)
+
+configure_file(
+  "${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
+  @ONLY
+)
+
+install(FILES
+  "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
+  DESTINATION ${config_install_dir}
+)
+
+install(EXPORT ${PROJECT_NAME}Targets
+  NAMESPACE ${PROJECT_NAME}::
+  DESTINATION ${config_install_dir}
+)
