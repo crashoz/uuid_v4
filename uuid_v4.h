@@ -55,7 +55,7 @@ void inline m128itos(__m128i x, char* mem) {
   resd = _mm256_or_si256(resd, dash);
 
   _mm256_storeu_si256((__m256i*)mem, betole256(resd));
-  *(uint16_t*)(mem+16) = betole16(_mm256_extract_epi16(res, 7));
+  *(uint16_t*)(mem+16) = betole16(static_cast<uint16_t>(_mm256_extract_epi16(res, 7)));
   *(uint32_t*)(mem+32) = betole32(_mm256_extract_epi32(res, 7));
 }
 

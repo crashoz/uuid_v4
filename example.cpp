@@ -24,7 +24,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   }
   auto t2 = std::chrono::high_resolution_clock::now();
   auto diff = t2-t1;
-  std::cout << "ops/sec: " << IT / (std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count() / 1e9) << std::endl;
+  std::cout << "ops/sec: " << IT / (std::chrono::duration_cast<std::chrono::duration<double, std::nano>>(diff).count() / 1e9) << std::endl;
 
   UUIDv4::UUID load;
   std::cin >> load;
